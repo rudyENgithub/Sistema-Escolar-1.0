@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+          
+    
+    
+    <ui:composition template="WEB-INF/templates/template.xhtml">
+        
+        <ui:define name="metadata">
+            
+        </ui:define>
+        
+        <ui:define name="styles">
+            
+        </ui:define>
+        <ui:define name="title">
+            Turmas - Sistema Escolar
+        </ui:define>
+        
+        
+        <ui:define name="content">
+            
+            
+            <div class="container">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <p:outputLabel value="Turmas" style="font-size: 2em;"/>
+                        <p:commandButton value="Adicionar Nova" style="margin-left: 5px;" resetValues="true"
+                                         oncomplete="PF('dlg1').show();" update=":dialog_form" process="@this"
+                                        actionListener="#{turmasMB.newTurma()}" icon="ui-icon-plusthick"/>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!--<p:inputText placeholder="Buscar...." styleClass="fullwidth"/>-->
+                    </div>
+                </div>
+                
+                <div class="row" style="margin-top: 1%;">
+                    <div class="col-md-12">
+                        <h:form id="table_form">
+                            <p:messages/>
+                            <p:dataTable id="lazyTable" var="turma" value="#{turmasMB.lazyTurmas}" paginator="true" 
+                                         rows="10" paginatorPosition="bottom" emptyMessage="Não foram encontrados resultados" 
+                                         lazy="true" rowsPerPageTemplate="5,10,15"
+                                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                         {NextPageLink} {LastPageLink}     {RowsPerPageDropdown}"
+                                         currentPageReportTemplate="Registros: {startRecord} - {endRecord} de {totalRecords}, 
+                                         Página: {currentPage} de {totalPages}"
+                                         rowsPerPageLabel="Registros por página: "
+                                         sortBy="#{turma.id}" sortOrder="ascending">
+                                
+                                <f:facet name="header">
+                                    Turmas
+                                    <p:commandButton id="toggler" type="button" value="Colunas" style="float:right" icon="ui-icon-calculator" />
+                                    <p:columnToggler datasource="lazyTable" trigger="toggler" />
+                                </f:facet>
+                                
+                                <p:column headerText="ID" width="30px" sortBy="#{turma.id}">
+                                    <h:outputText value="#{turma.id}" />
+                                </p:column>
+                                
+                                <p:column headerText="NOME" sortBy="#{turma.nome}"
+                                          filterBy="#{turma.nome}">
+                                    <h:outputText value="#{turma.nome}"/>
+                                </p:column> 
+                                
+                                <p:column headerText="SÉRIE" sortBy="#{turma.serie.nome}"
+                                          filterBy="#{turma.serie.nome}">
+                                    <h:outputText value="#{turma.serie.nome}"/>
+                                </p:column>
+                                
+                                <p:column headerText="AÇÔES">
+                                    
+                                    <p:commandButton value="Detalhes" actionListener="#{turmasMB.selectTurma(turma)}"
+                                        oncomplete="PF('dialog_detalhes').show();" update=":dialog_detalhes"/>
+                                    
+                                    <p:commandButton value="Editar" actionListener="#{turmasMB.selectTurma(turma)}" 
+                                       oncomplete="PF('dlg1').show(); PF('wizard').loadStep('wiz_tab1', false);" 
+                                                     update=":dialog_form" resetValues="true" process="@this"/>
+                                    
+                                    <p:commandButton value="Excluir" process="@form" update=":table_form" 
+                                                     actionListener="#{turmasMB.deleteTurma(turma)}">
+                                        <p:confirm header="Confirmação" message="Tem certeza que deseja excluir essa turma #{turma.toString()}?" 
+                                                   icon="ui-icon-alert" />
+                                    </p:commandButton>
+                                    
+                                </p:column>
+                                
+                            </p:dataTable>
+                        </h:form>
+                    
+                    </div>
+                </div>
+            </div>
+            
+            <p:dialog header="Turma" widgetVar="dlg1" height="450px" width="50%">
+                <h:form id="dialog_form">
+                    <p:wizard backLabel="Voltar" nextLabel="Próximo" widgetVar="wizard">
+                        <p:tab title="Dados Básicos" id="wiz_tab1">
+                            <p:panel header="Dados da Turma">
+                                <p:messages/>
+                                <h:panelGrid columns="2" styleClass="fullwidth">
+                                    <p:outputLabel value="Nome: * " for="turma_nome"/>
+                                    <p:inputText id="turma_nome" value="#{turmasMB.turma.nome}"/>
+                                    
+                                    <p:outputLabel value="Série: " for="selectSerie"/>
+                                    <p:selectOneMenu id="selectSerie" value="#{turmasMB.selectedSerieId}" filter="true" filterMatchMode="startsWith"
+                                                     style="width: 200px;" required="true" requiredMessage="Preencha a série!">
+                                        <p:ajax event="change" listener="#{turmasMB.onSerieSelect}" process="@this"/>
+                                        <f:selectItem itemLabel="-- Escolha uma Série --" noSelectionOption="true"/>
+                                        <f:selectItems value="#{turmasMB.series}" var="serie" itemLabel="#{serie.nome}"
+                                                       itemValue="#{serie.id}"/>
+                                    </p:selectOneMenu>
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                       
+                        <p:tab title="Confirmar">
+                            <p:panel header="Confirmar Dados e Salvar">
+                                <p:messages/>
+                                <h:panelGrid columns="4" styleClass="fullwidth">
+                                    <p:outputLabel value="Nome: "/>
+                                    <p:outputLabel value="#{turmasMB.turma.nome}"/>
+                                    <p:outputLabel value="Série: "/>
+                                    <h:outputText value="#{turmasMB.turma.serie.nome}"/> 
+                                </h:panelGrid>
+                                <p:commandButton value="Salvar Turma" action="#{turmasMB.saveTurma()}" process="@form"
+                                        update=":table_form :dialog_form" onsuccess="PF('wizard').loadStep('wiz_tab1', false); PF('dlg1').hide();"/>
+                                
+                            </p:panel>
+                        </p:tab>
+                    </p:wizard>
+                    
+                    <p:commandButton value="Cancelar" type="button" onclick="PF('dlg1').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Turma #{turmasMB.turma.toString()}" id="dialog_detalhes" 
+                      widgetVar="dialog_detalhes" height="450px" width="50%">
+                <p:tabView>
+                    <p:tab title="Dados Básicos">
+                        <h:panelGrid columns="4" styleClass="fullwidth">
+                            <p:outputLabel value="Nome: "/>
+                            <p:outputLabel value="#{turmasMB.turma.nome}"/>
+                            <p:outputLabel value="Série: "/>
+                            <p:outputLabel value="#{turmasMB.turma.serie.nome}" />
+                        </h:panelGrid> 
+                    </p:tab>
+                    
+                    <p:tab title="Alunos">
+                        <p:dataGrid value="#{turmasMB.turma.alunos}" var="each" columns="2" paginatorPosition="bottom"
+                                    paginator="true" emptyMessage="Essa Turma não possui alunos!" layout="grid">
+                            <h:panelGrid columns="2" styleClass="fullwidth">
+                                <p:outputLabel value="Aluno Nome: "/>
+                                <h:outputText  value="#{each.toString()}"/>
+                            </h:panelGrid>
+                        </p:dataGrid>
+                    </p:tab>
+                </p:tabView>
+                
+                <p:commandButton value="Fechar" type="button" onclick="PF('dialog_detalhes').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+            </p:dialog>
+            
+        </ui:define>
+        
+        
+        
+        
+        
+        
+        <ui:define name="scripts">
+            
+        </ui:define>
+    </ui:composition> 
+    
+</html>

@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    
+     <ui:insert name="metadata"/>
+    
+    <h:head>
+        
+       <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+       <ui:insert name="styles"/>
+
+       <h:outputStylesheet name="bootstrap/css/bootstrap.min.css"/>
+       <h:outputStylesheet name="geral.css"/>
+       
+        <title><ui:insert name="title"/></title>
+    </h:head>
+
+    <h:body>
+        <div id="page">
+            <div id="top-bar">
+                <ui:include src="modulos/top-bar.xhtml"/>
+            </div>
+
+            <div id="header">
+                <ui:include src="modulos/header.xhtml"/>
+            </div>
+
+            <div id="content" class="center_content">
+                <ui:insert name="content"/>
+                <ui:include src="modulos/dialogs.xhtml"/>
+            </div>
+
+            <div id="bottom">
+               <ui:include src="modulos/footer.xhtml"/>
+            </div>
+        </div>
+
+        <ui:insert name="scripts"/>
+    </h:body>
+
+</html>

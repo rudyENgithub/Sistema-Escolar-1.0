@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+          
+    
+    
+    <ui:composition template="WEB-INF/templates/template.xhtml">
+        
+        <ui:define name="metadata">
+            
+        </ui:define>
+        
+        <ui:define name="styles">
+            
+        </ui:define>
+        
+        <ui:define name="title">
+            Matérias - Sistema Escolar
+        </ui:define>
+        
+        
+        <ui:define name="content">
+            
+            
+            <div class="container">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <p:outputLabel value="Matérias" style="font-size: 2em;"/>
+                        <p:commandButton value="Adicionar Nova" style="margin-left: 5px;" process="@this"
+                                        oncomplete="PF('dlg1').show();" update=":dialog_form" resetValues="true"
+                                        actionListener="#{materiasMB.newMateria()}" icon="ui-icon-plusthick"/>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!--<p:inputText placeholder="Buscar...." style="width: 100%;"/>-->
+                    </div>
+                </div>
+                
+                <div class="row" style="margin-top: 1%;">
+                    <div class="col-md-12">
+                        <h:form id="table_form">
+                            <p:messages />
+                            <p:dataTable id="lazyTable" var="materia" value="#{materiasMB.lazyMaterias}" paginator="true" 
+                                         rows="10" paginatorPosition="bottom" emptyMessage="Não foram encontrados resultados" 
+                                         lazy="true" rowsPerPageTemplate="5,10,15"
+                                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                         {NextPageLink} {LastPageLink}     {RowsPerPageDropdown}"
+                                         currentPageReportTemplate="Registros: {startRecord} - {endRecord} de {totalRecords}, 
+                                         Página: {currentPage} de {totalPages}"
+                                         rowsPerPageLabel="Registros por página: "
+                                         sortBy="#{materia.id}" sortOrder="ascending">
+                                
+                                <f:facet name="header">
+                                    Matérias
+                                    <p:commandButton id="toggler" type="button" value="Colunas" style="float:right" icon="ui-icon-calculator" />
+                                    <p:columnToggler datasource="lazyTable" trigger="toggler" />
+                                </f:facet>
+                                
+                                <p:column headerText="ID" width="30px" sortBy="#{materia.id}">
+                                    <h:outputText value="#{materia.id}"/>
+                                </p:column>
+                                
+                                <p:column headerText="NOME" sortBy="#{materia.nome}"
+                                          filterBy="#{materia.nome}">
+                                    <h:outputText value="#{materia.nome}"/>
+                                </p:column> 
+                                
+                                <p:column headerText="PROFESSOR" sortBy="#{materia.professor.nome}"
+                                          filterBy="#{materia.professor.nome}">
+                                    <h:outputText 
+                                        value="#{empty materia.professor ? 
+                                                 'Não possui professor!' 
+                                                 : materia.professor.toString()}"/>
+                                </p:column>
+                                
+                                <p:column headerText="SÉRIE" sortBy="#{materia.serie.nome}"
+                                          filterBy="#{materia.serie.nome}">
+                                    <h:outputText value="#{materia.serie.nome}"/>
+                                </p:column>
+                                
+                                <p:column headerText="AÇÔES">
+                                    
+                                    <p:commandButton value="Detalhes" actionListener="#{materiasMB.selectMateria(materia)}"
+                                        oncomplete="PF('dialog_detalhes').show();" update=":dialog_detalhes"/>
+                                    
+                                    <p:commandButton value="Editar" actionListener="#{materiasMB.selectMateria(materia)}" 
+                                                     oncomplete="PF('dlg1').show(); PF('wizard').loadStep('wiz_tab1', false);" 
+                                                     update=":dialog_form" resetValues="true" process="@this"/>
+                                    
+                                    <p:commandButton value="Excluir" process="@form" update=":table_form" 
+                                                     actionListener="#{materiasMB.deleteMateria(materia)}">
+                                        <p:confirm header="Confirmação" message="Tem certeza que deseja excluir a matéria #{materia.nome}?" 
+                                                   icon="ui-icon-alert" />
+                                    </p:commandButton>
+                                    
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+                    
+                    </div>
+                </div>
+            </div>
+            
+            <p:dialog header="Matéria" widgetVar="dlg1" height="450px" width="50%" modal="true">
+                <p:ajax event="close" update=":dialog_form" listener="#{materiasMB.newMateria()}"/>
+                <h:form id="dialog_form">
+                    <p:wizard backLabel="Voltar" nextLabel="Próximo" widgetVar="wizard">
+                        <p:tab title="Dados Básicos" id="wiz_tab1">
+                            <p:panel header="Dados da Matéria">
+                                <p:messages/>
+                                <h:panelGrid columns="2" style="width: 100%;">
+                                    <p:outputLabel value="Nome: * " for="materia_nome"/>
+                                    <p:inputText id="materia_nome" value="#{materiasMB.materia.nome}"/>
+                                    
+                                    
+                                    <p:outputLabel value="Professor * " />
+                                    <h:panelGrid columns="2" cellspacing="5">
+                                        <p:inputText id="selectedProfessor" 
+                                                     value="#{materiasMB.selectedProfessor.nome != null ? materiasMB.selectedProfessor.toString() : ' '}" 
+                                                     readonly="true"/>
+                                                     
+                                        <p:commandButton icon="ui-icon-search" title="Pesquisa" 
+                                                         actionListener="#{searchProfessorMB.createDialog()}"
+                                                         process="@this" update="@none">
+                                            <p:ajax event="dialogReturn" listener="#{materiasMB.selectProfessor}"
+							process="@this" update="selectedProfessor" />
+                                        </p:commandButton>
+                                    </h:panelGrid>
+                                    
+                                    <p:outputLabel value="Série: " for="selectSerie"/>
+                                    <p:selectOneMenu id="selectSerie" value="#{materiasMB.serieId}" filter="true" filterMatchMode="startsWith"
+                                                     style="width: 200px;" required="true" requiredMessage="Preencha a série!">
+                                        <p:ajax event="change" listener="#{materiasMB.selectSerie}" process="@this"/>
+                                        <f:selectItem itemLabel="-- Escolha uma Série --" noSelectionOption="true"/>
+                                        <f:selectItems value="#{materiasMB.series}" var="serie" itemLabel="#{serie.nome}"
+                                                       itemValue="#{serie.id}"/>
+                                    </p:selectOneMenu>
+                                    
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        
+                        <p:tab title="Confirmar">
+                            <p:panel header="Confirmar Dados e Salvar">
+                                <p:messages/>
+                                <h:panelGrid columns="4" style="width: 100%;">
+                                    <p:outputLabel value="Nome: "/>
+                                    <h:outputText value="#{materiasMB.materia.nome}"/>
+                                    <p:outputLabel value="Professor: " rendered="#{not empty materiasMB.materia.professor}"/>
+                                    <h:outputText value="#{materiasMB.materia.professor.toString()}" 
+                                                  rendered="#{not empty materiasMB.materia.professor}"/>
+                                    <p:outputLabel value="Série: "/>
+                                    <h:outputText value="#{materiasMB.materia.serie.nome}"/> 
+                                </h:panelGrid>
+                                <p:commandButton value="Salvar Matéria" action="#{materiasMB.saveMateria()}" process="@form"
+                                        update=":table_form :dialog_form" 
+                                        onsuccess="PF('wizard').loadStep('wiz_tab1', false); PF('dlg1').hide();"/>
+                                
+                            </p:panel>
+                        </p:tab>
+                    </p:wizard>
+                    
+                    <p:commandButton value="Cancelar" type="button" onclick="PF('dlg1').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Matéria #{materiasMB.materia.nome}" id="dialog_detalhes" 
+                      widgetVar="dialog_detalhes" height="450px" width="50%" modal="true">
+                <p:tabView>
+                    <p:tab title="Dados Básicos">
+                        <h:panelGrid columns="2" style="width: 100%;">
+                            <p:outputLabel value="Nome:" for="materia_nome"/>
+                            <h:outputText id="materia_nome" value="#{materiasMB.materia.nome}"/>
+                            <p:outputLabel value="Professor: "/>
+                            <h:outputText 
+                                value="#{not empty materiasMB.materia.professor 
+                                         ? materiasMB.materia.professor.toString() 
+                                         : 'Não possui professor!' }"/> 
+                                          
+                            <p:outputLabel value="Série: "/>
+                            <h:outputText value="#{materiasMB.materia.serie.nome}"/>
+                        </h:panelGrid> 
+                    </p:tab>
+                </p:tabView>
+                
+                <p:commandButton value="Fechar" type="button" onclick="PF('dialog_detalhes').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+            </p:dialog>
+            
+        </ui:define>
+        
+        
+        
+        
+        
+        
+        <ui:define name="scripts">
+            
+        </ui:define>
+    </ui:composition> 
+    
+</html>

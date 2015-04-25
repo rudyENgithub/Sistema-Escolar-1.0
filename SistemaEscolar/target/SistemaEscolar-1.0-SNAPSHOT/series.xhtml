@@ -1,0 +1,170 @@
+<ui:composition template="WEB-INF/templates/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="metadata">
+
+    </ui:define>
+
+    <ui:define name="styles">
+
+    </ui:define>
+    <ui:define name="title">
+        Séries - Sistema Escolar
+    </ui:define>
+
+
+    <ui:define name="content">
+
+
+        <div class="container">
+
+            <div class="row">
+                <div class="col-md-8">
+                    <p:outputLabel value="Séries" style="font-size: 2em;"/>
+                    <p:commandButton value="Adicionar Nova" style="margin-left: 5px;" process="@this"
+                                    oncomplete="PF('dlg1').show();" update=":dialog_form" resetValues="true"
+                                    actionListener="#{seriesMB.newSerie()}" icon="ui-icon-plusthick"/>
+                </div>
+
+                <div class="col-md-4">
+                    <!--<p:inputText placeholder="Buscar...." class="fullwidth"/>-->
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 1%;">
+                <div class="col-md-12">
+                    <h:form id="table_form">
+                        <p:messages/>
+                        <p:dataTable id="lazyTable" var="serie" value="#{seriesMB.lazySeries}" paginator="true" 
+                                     rows="10" paginatorPosition="bottom" emptyMessage="Não foram encontrados resultados" 
+                                     lazy="true" rowsPerPageTemplate="5,10,15"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                     {NextPageLink} {LastPageLink}     {RowsPerPageDropdown}"
+                                     currentPageReportTemplate="Registros: {startRecord} - {endRecord} de {totalRecords}, 
+                                     Página: {currentPage} de {totalPages}"
+                                     rowsPerPageLabel="Registros por página: "
+                                     sortBy="#{serie.id}" sortOrder="ascending">
+
+                            <f:facet name="header">
+                                Séries
+                                <p:commandButton id="toggler" type="button" value="Colunas" style="float:right" icon="ui-icon-calculator" />
+                                <p:columnToggler datasource="lazyTable" trigger="toggler" />
+                            </f:facet>
+
+                            <p:column headerText="ID" width="30px" sortBy="#{serie.id}">
+                                <h:outputText value="#{serie.id}"/>
+                            </p:column>
+
+                            <p:column headerText="NOME" sortBy="#{serie.nome}"
+                                      filterBy="#{serie.nome}">
+                                <h:outputText value="#{serie.nome}"/>
+                            </p:column>                                 
+
+                            <p:column headerText="AÇÔES">
+
+                                <p:commandButton value="Detalhes" actionListener="#{seriesMB.selectSerie(serie)}"
+                                    oncomplete="PF('dialog_detalhes').show();" update=":dialog_detalhes"/>
+
+                                <p:commandButton value="Editar" actionListener="#{seriesMB.selectSerie(serie)}" 
+                                                 oncomplete="PF('dlg1').show(); PF('wizard').loadStep('wiz_tab1', false);" 
+                                                     update=":dialog_form" resetValues="true" process="@this"/>
+
+                                <p:commandButton value="Excluir" process="@form" update=":table_form" 
+                                                 actionListener="#{seriesMB.deleteSerie(serie)}">
+                                    <p:confirm header="Confirmação" message="Tem certeza que deseja excluir o professor #{serie.nome}?" 
+                                               icon="ui-icon-alert" />
+                                </p:commandButton>
+
+                            </p:column>
+
+                        </p:dataTable>
+                    </h:form>
+
+                </div>
+            </div>
+        </div>
+
+        <p:dialog header="Série" widgetVar="dlg1" height="450px" width="50%">
+            <p:ajax event="close" update=":dialog_form" listener="#{seriesMB.newSerie()}"/>
+            <h:form id="dialog_form">
+                <p:wizard backLabel="Voltar" nextLabel="Próximo" widgetVar="wizard">
+                    <p:tab title="Dados Básicos" id="wiz_tab1">
+                        <p:panel header="Dados Pessoais">
+                            <p:messages/>
+                            <h:panelGrid columns="2" class="fullwidth">
+                                <p:outputLabel value="Nome: * " for="serie_nome"/>
+                                <p:inputText id="serie_nome" value="#{seriesMB.serie.nome}"/>
+
+                            </h:panelGrid>
+
+                        </p:panel>
+                    </p:tab>
+
+                    <p:tab title="Confirmar">
+                        <p:panel header="Confirmar Dados e Salvar">
+                            <p:messages/>
+                            <h:panelGrid columns="2" class="fullwidth">
+
+
+                                <p:commandButton value="Salvar Série" action="#{seriesMB.saveSerie()}" process="@form"
+                                    update=":table_form :dialog_form" onsuccess="PF('wizard').loadStep('wiz_tab1', false); PF('dlg1').hide();"/>
+                            </h:panelGrid>
+
+                        </p:panel>
+                    </p:tab>
+                </p:wizard>
+                
+                <p:commandButton value="Cancelar" type="button" onclick="PF('dlg1').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Série #{seriesMB.serie.nome}" id="dialog_detalhes" 
+                  widgetVar="dialog_detalhes" height="450px" width="50%">
+            <p:tabView>
+                <p:tab title="Dados Básicos">
+                    <h:panelGrid columns="2" class="fullwidth">
+                        <p:outputLabel value="Nome: " />
+                        <h:outputText  value="#{seriesMB.serie.nome}"/>
+                    </h:panelGrid> 
+                </p:tab>
+
+                <p:tab title="Turmas">
+                    <p:dataGrid value="#{seriesMB.serie.turmas}" var="tur" columns="2" paginatorPosition="bottom"
+                                paginator="true" emptyMessage="Essa Série não possui turmas!" layout="grid">
+                        <h:panelGrid columns="2" class="fullwidth">
+                            <p:outputLabel value="Turma:  "/>
+                            <h:outputText  value="#{tur.nome}"/>
+                        </h:panelGrid>
+                    </p:dataGrid>
+                </p:tab>
+
+                <p:tab title="Matérias">
+                    <p:dataGrid value="#{seriesMB.serie.materias}" var="mat" columns="2" paginatorPosition="bottom"
+                                paginator="true" emptyMessage="Essa Série não possui matérias!" layout="grid">
+                        <h:panelGrid columns="2" class="fullwidth">
+                            <p:outputLabel value="Matéria: "/>
+                            <h:outputText  value="#{mat.nome}"/>
+                            <p:outputLabel value="Matéria - Professor "/>
+                            <h:outputText  value="#{mat.professor.toString()}"/>
+                        </h:panelGrid>
+                    </p:dataGrid>
+                </p:tab>
+            </p:tabView>
+            
+            <p:commandButton value="Fechar" type="button" onclick="PF('dialog_detalhes').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+        </p:dialog>
+
+    </ui:define>
+
+
+    <ui:define name="scripts">
+
+    </ui:define>
+</ui:composition> 
+

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+          
+    
+    
+    <ui:composition template="WEB-INF/templates/template.xhtml">
+        
+        <ui:define name="metadata">
+            
+        </ui:define>
+        
+        <ui:define name="styles">
+            
+        </ui:define>
+        <ui:define name="title">
+            Home - Sistema Escolar
+        </ui:define>
+        
+        
+        <ui:define name="content">
+            
+            
+            <div class="container">
+                
+                
+                
+                <div class="row" style="margin-top: 1%; text-align: center;">
+                    <div class="col-md-12">
+                        <h1>#{appMB.welcome()}</h1>
+                        <p:commandButton value="Indexar" actionListener="#{appMB.indexar()}" />
+                                         <!--styleClass="putmiddle"/>-->
+                    
+                    </div>
+                </div>
+                
+                <div class="row" style="margin-top: 30px;">
+                    <div class="col-md-offset-2 col-md-8">
+                        <p:schedule widgetVar="agenda" value="#{scheduleMB.model}" locale="pt" tooltip="true"
+                                    id="agenda" ignoreTimezone="false" timeZone="UTC-3">
+                            <p:ajax event="dateSelect" listener="#{scheduleMB.onDateSelect}" update="eventDetails" oncomplete="PF('eventDialog').show();" />
+                            <p:ajax event="eventSelect" listener="#{scheduleMB.onEventSelect}" update="eventDetails" oncomplete="PF('eventDialog').show();" />
+                            <p:ajax event="eventMove" listener="#{scheduleMB.onEventMove}" />
+                            <p:ajax event="eventResize" listener="#{scheduleMB.onEventResize}"/>
+                        </p:schedule>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            
+            <p:dialog header="Evento" widgetVar="eventDialog" id="eventDialog" 
+                      height="200" width="450">
+                <h:panelGrid id="eventDetails" columns="2" style="width: 100%;">
+                    <p:outputLabel value="Titulo do Evento: " for="title"/>
+                    <p:inputText id="title" value="#{scheduleMB.evento.titulo}"/>
+                    <p:outputLabel value="Data Inicial: "/>
+                    <p:calendar pattern="dd/MM/yyyy HH:mm" mask="true" 
+                                locale="pt" value="#{scheduleMB.evento.dataInicial}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="UTC-3"/>
+                    </p:calendar>
+                    <p:outputLabel value="Data Final: "/>
+                    <p:calendar pattern="dd/MM/yyyy HH:mm" mask="true" 
+                                locale="pt" value="#{scheduleMB.evento.dataFinal}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="UTC-3" />
+                    </p:calendar>
+                    <p:outputLabel value="Irá ocorrer no dia todo?"/>
+                    <p:selectBooleanCheckbox value="#{scheduleMB.evento.allDay}"/>
+                </h:panelGrid>
+                <h:panelGrid columns="2" style="width: 100%; margin-top: 20px;"> 
+                    <p:commandButton value="Salvar Evento" actionListener="#{scheduleMB.saveEvento()}"
+                                     oncomplete="PF('agenda').update();PF('eventDialog').hide();"/>
+                    <p:commandButton value="Limpar"/>
+                </h:panelGrid>
+                
+            </p:dialog>
+  
+        </ui:define>
+        
+        
+        
+        
+        
+        
+        <ui:define name="scripts">
+            <h:outputScript name="locales.js"/>
+        </ui:define>
+        
+    </ui:composition> 
+    
+</html>

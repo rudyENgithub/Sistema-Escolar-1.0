@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      >
+          
+    
+    
+    <ui:composition template="WEB-INF/templates/template.xhtml">
+        
+        <ui:define name="metadata">
+            
+        </ui:define>
+        
+        <ui:define name="styles">
+            
+        </ui:define>
+        <ui:define name="title">
+            Turmas e Alunos - Sistema Escolar
+        </ui:define>
+        
+        
+        <ui:define name="content">
+            
+            
+            <div class="container">
+                
+                <div class="row">
+                    <div class="col-md-12"><p:outputLabel value="Turmas e Alunos" style="font-size: 2em;"/></div>
+                </div>
+                
+                <div class="row" style="margin-top: 2%;">
+                    <div class="col-md-6">
+                        <h:outputText value="Escolha uma Série: " style="font-size: 1.4em;"/>
+                    </div>
+                    <div class="col-md-6">
+                        <h:form>
+                            <p:selectOneMenu value="#{turmasAlunosMB.selectedSerieId}" filter="true" filterMatchMode="startsWith"
+                                            style="width: 200px;" >
+                                <p:ajax event="change" listener="#{turmasAlunosMB.onSerieChange}" process="@this"
+                                        update=":table_form"/>
+                               <f:selectItem itemLabel="-- Escolha uma Série --" noSelectionOption="true"/>
+                               <f:selectItems value="#{turmasAlunosMB.series}" var="serie" itemLabel="#{serie.nome}"
+                                              itemValue="#{serie.id}" />
+                           </p:selectOneMenu>
+                        </h:form>
+                    </div>
+                </div>
+                
+                <div class="row" style="margin-top: 1%;">
+                    <div class="col-md-12">
+                        
+                        <h:form id="table_form">
+                            <p:messages/>
+                            <p:dataTable id="turmas" var="turma" value="#{turmasAlunosMB.selectedSerie.turmas}" paginator="true" 
+                                         rows="15" paginatorPosition="bottom" emptyMessage="Essa Série não possui Turmas!" >
+                                
+                                <f:facet name="header">
+                                    Turmas da Série - #{turmasAlunosMB.selectedSerie.nome} 
+                                </f:facet>
+                                
+                                <p:column headerText="ID" width="30px">
+                                    <h:outputText value="#{turma.id}"/>
+                                </p:column>
+                                
+                                <p:column headerText="NOME">
+                                    <h:outputText value="#{turma.nome}"/>
+                                </p:column> 
+                                
+                                <p:column headerText="AÇÔES">
+                                    
+                                    <p:commandButton value="Gerenciar Alunos" actionListener="#{gerenciarAlunosMB.selectTurma(turma)}"
+                                        oncomplete="PF('dialog_manage_alunos').show();" update=":dialog_manage_alunos"/>
+                                    
+                                </p:column>
+                                
+                            </p:dataTable>
+                        </h:form>
+                        
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        
+                    </div>
+                </div>
+                
+            </div>
+            
+            
+            
+            <p:dialog header="Alunos da Turma #{gerenciarAlunosMB.turma.nome}" id="dialog_manage_alunos" widgetVar="dialog_manage_alunos"
+                      height="450px" width="50%">
+                <!--<p:ajax event="close" />-->
+                <h:form>
+                    <p:messages/>
+                    <p:dataTable id="alunos" var="aluno" value="#{gerenciarAlunosMB.turmaAlunos}" paginator="true" 
+                                             rows="15" paginatorPosition="bottom" emptyMessage="Essa Turma não possui Alunos!" >
+
+
+                        <p:column headerText="ID" width="30px">
+                            <h:outputText value="#{aluno.id}"/>
+                        </p:column>
+
+                        <p:column headerText="NOME">
+                            <h:outputText value="#{aluno.toString()}"/>
+                        </p:column> 
+
+                        <p:column headerText="AÇÔES">
+
+                            <p:commandButton value="Remover Aluno da Turma" actionListener="#{gerenciarAlunosMB.removeFromTurma(aluno)}"
+                                             process="@this" update="alunos"/>
+
+                        </p:column>
+
+                    </p:dataTable>
+
+                    <h:panelGrid columns="2" style="width: 100%; margin-top: 20px;">
+                        <p:commandButton icon="ui-icon-search" value="Adicionar Alunos" 
+                                         actionListener="#{searchAlunoMB.createDialog(gerenciarAlunosMB.turma.serie)}"
+                                         process="@this" update="@none">
+                            <p:ajax event="dialogReturn" listener="#{gerenciarAlunosMB.getAddedAlunos}"
+                                                            process="@this" update="alunos" />
+                        </p:commandButton>
+                        <p:commandButton icon="ui-icon-cancel" value="Fechar" style="float: right;"
+                                         onclick="PF('dialog_manage_alunos').hide();" type="button"/>
+
+                    </h:panelGrid>
+                </h:form>
+                
+            </p:dialog>
+            
+            
+            <p:dialog header="Turma" widgetVar="dlg1" height="450px" width="50%">
+                <h:form id="dialog_form">
+                    <p:wizard backLabel="Voltar" nextLabel="Próximo" widgetVar="wizard">
+                        <p:tab title="Dados Básicos" id="wiz_tab1">
+                            <p:panel header="Dados da Turma">
+                                <p:messages/>
+                                <h:panelGrid columns="2">
+                                    <p:outputLabel value="Nome: * " for="turma_nome"/>
+                                    <p:inputText id="turma_nome" value="#{turmasMB.turma.nome}"/>
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                       
+                        <p:tab title="Confirmar">
+                            <p:panel header="Confirmar Dados e Salvar">
+                                <p:messages/>
+                                <h:panelGrid columns="2">
+                                    <p:outputLabel value="Nome: "/>
+                                    <p:outputLabel value="#{turmasMB.turma.nome}"/>
+                                    <p:commandButton value="Salvar Turma" action="#{turmasMB.saveTurma()}" process="@form"
+                                        update=":table_form :dialog_form" onsuccess="PF('wizard').loadStep('wiz_tab1', false); PF('dlg1').hide();"/>
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                    </p:wizard>
+                </h:form>
+            </p:dialog>
+            
+        </ui:define>
+        
+        
+        
+        
+        
+        
+        <ui:define name="scripts">
+            
+        </ui:define>
+    </ui:composition> 
+    
+</html>

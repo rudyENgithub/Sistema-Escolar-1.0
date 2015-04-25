@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+          
+    
+    
+    <ui:composition template="WEB-INF/templates/template.xhtml">
+        
+        <ui:define name="metadata">
+            
+        </ui:define>
+        
+        <ui:define name="styles">
+            
+        </ui:define>
+        
+        <ui:define name="title">
+            Professores - Sistema Escolar
+        </ui:define>
+        
+        
+        <ui:define name="content">
+            
+            
+            <div class="container">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <p:outputLabel value="Professores" style="font-size: 2em;"/>
+                        <p:commandButton value="Adicionar Novo" style="margin-left: 5px;" process="@this"
+                                        oncomplete="PF('dlg1').show();" update=":dialog_form" resetValues="true"
+                                        actionListener="#{professoresMB.newProfessor()}" icon="ui-icon-plusthick"/>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!--<p:inputText placeholder="Buscar...." class="fullwidth"/>-->
+                    </div>
+                </div>
+                
+                <div class="row" style="margin-top: 1%;">
+                    <div class="col-md-12">
+                        <h:form id="table_form">
+                            <p:messages />
+                            <p:dataTable id="lazyTable" var="professor" value="#{professoresMB.lazyProfessores}" paginator="true" 
+                                         rows="10" paginatorPosition="bottom" emptyMessage="Não foram encontrados resultados" 
+                                         lazy="true" rowsPerPageTemplate="5,10,15"
+                                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                         {NextPageLink} {LastPageLink}     {RowsPerPageDropdown}"
+                                         currentPageReportTemplate="Registros: {startRecord} - {endRecord} de {totalRecords}, 
+                                         Página: {currentPage} de {totalPages}"
+                                         rowsPerPageLabel="Registros por página: "
+                                         sortBy="#{professor.id}" sortOrder="ascending">
+                               
+                                <f:facet name="header">
+                                    Professores
+                                    <p:commandButton id="toggler" type="button" value="Colunas" style="float:right" icon="ui-icon-calculator" />
+                                    <p:columnToggler datasource="lazyTable" trigger="toggler" />
+                                </f:facet>
+                                
+                                <p:column headerText="ID" sortBy="#{professor.id}">
+                                    <h:outputText value="#{professor.id}"/>
+                                </p:column>
+                                
+                                <p:column headerText="NOME" sortBy="#{professor.nome}" filterBy="#{professor.nome}">
+                                    <h:outputText 
+                                        value="#{professor.toString()}"/>
+                                </p:column> 
+                                
+                                <p:column headerText="FORMAÇÃO" sortBy="#{professor.formacao}" filterBy="#{professor.formacao}">
+                                    <h:outputText value="#{professor.formacao}"/>
+                                </p:column>
+                                
+                                
+                                <p:column headerText="AÇÔES">
+                                    
+                                    <p:commandButton value="Detalhes" actionListener="#{professoresMB.selecionaProfessor(professor)}"
+                                        oncomplete="PF('dialog_detalhes').show();" update=":dialog_detalhes" process="@this"/>
+                                    
+                                    <p:commandButton value="Editar" actionListener="#{professoresMB.selecionaProfessor(professor)}" 
+                                                     oncomplete="PF('dlg1').show(); PF('wizard').loadStep('wiz_tab1', false);" 
+                                                     update=":dialog_form" resetValues="true" process="@this"/>
+                                    
+                                    <p:commandButton value="Excluir" process="@form" update=":table_form" 
+                                                     actionListener="#{professoresMB.deletar(professor)}">
+                                        <p:confirm header="Confirmação" message="Tem certeza que deseja excluir o professor #{professor.toString()}?" 
+                                                   icon="ui-icon-alert" />
+                                    </p:commandButton>
+                                    
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+                    
+                    </div>
+                </div>
+            </div>
+            
+            <p:dialog header="Professor" widgetVar="dlg1" height="400px" width="50%" modal="true">
+                <p:ajax event="close" update=":dialog_form" listener="#{professoresMB.newProfessor()}"/>
+                <h:form id="dialog_form">
+                    <p:wizard backLabel="Voltar" nextLabel="Próximo" flowListener="#{wizardMB.onFlowProcess}" widgetVar="wizard">
+                        <p:tab title="Dados Básicos" id="wiz_tab1">
+                            <p:panel header="Dados Pessoais">
+                                <p:messages/>
+                                <h:panelGrid columns="2" class="fullwidth">
+                                    <p:outputLabel value="Nome: * " for="prof_nome"/>
+                                    <p:inputText id="prof_nome" value="#{professoresMB.professor.nome}"/>
+                                    <p:outputLabel value="Sobrenome: * " for="prof_sobrenome" />
+                                    <p:inputText id="prof_sobrenome" value="#{professoresMB.professor.sobrenome}"/>
+                                    <p:outputLabel value="Formação: * " for="prof_formacao"/>
+                                    <p:inputText id="prof_formacao" value="#{professoresMB.professor.formacao}"/>
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Endereço">
+                            <p:panel header="Informações de Encereço">
+                                <p:messages/>
+                                <h:panelGrid columns="2" class="fullwidth">
+                                    <p:outputLabel value="Rua: * " for="prof_rua"/>
+                                    <p:inputText id="prof_rua" value="#{professoresMB.profEndereco.rua}"/>
+                                    <p:outputLabel value="Bairro: * " for="prof_bairro"/>
+                                    <p:inputText id="prof_bairro" value="#{professoresMB.profEndereco.bairro}"/>
+                                    <p:outputLabel value="Numero: * " for="prof_numero"/>
+                                    <p:inputText id="prof_numero" value="#{professoresMB.profEndereco.numero}"/>
+                                    <p:outputLabel value="Cidade: * " for="prof_cidade"/>
+                                    <p:inputText id="prof_cidade" value="#{professoresMB.profEndereco.cidade}"/>
+                                    <p:outputLabel value="CEP: * " for="prof_cep"/>
+                                    <p:inputMask id="prof_cep" value="#{professoresMB.profEndereco.cep}" mask="99999-999"/>
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Contato">
+                            <p:panel header="Dados Pessoais">
+                                <p:messages/>
+                                <h:panelGrid columns="2" class="fullwidth">
+                                    <p:outputLabel value="E-mail: " for="prof_email"/>
+                                    <p:inputText id="prof_email" value="#{professoresMB.professor.email}"/>
+                                    
+<!--                                    <p:outputLabel value="Telefones: "/>
+                                    <p:panelGrid columns="2" >
+                                        <p:outputLabel value="Número do Telefone: "/>
+                                        <p:inputText id="link_video" value="#{user.video.linkVideo}"/>
+
+                                        <p:commandButton id="vid_add" value="Adicionar" update=":cadastro:vid-table @parent" process="@parent" action="#{user.newVideo}">
+                                            <p:collector value="#{user.video}" addTo="#{user.videos}" unique="true"/>
+                                        </p:commandButton>
+                                    </p:panelGrid>
+
+                                    <p:outputLabel value="Videos: "/>
+
+                                    <p:dataTable id="vid-table" value="#{user.videos}" var="v" emptyMessage="Lista não possui itens">
+                                        <p:column headerText="Link Video">
+                                            <p:outputLabel value="#{v.linkVideo}"/>
+                                        </p:column>
+                                        <p:column headerText="Ações">
+
+                                            <p:commandLink value="Remover" update=":cadastro:vid-table" process=":cadastro:vid-table">
+                                                <p:collector value="#{v}" removeFrom="#{user.videos}" unique="true"/>
+                                            </p:commandLink>
+                                        </p:column>
+                                    </p:dataTable>-->
+                                    
+                                    
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Confirmar">
+                            <p:panel header="Confirmar Dados e Salvar">
+                                <p:messages/>
+                                <h:panelGrid columns="4" class="fullwidth">
+                                    <p:outputLabel value="Nome: " />
+                                    <h:outputText  value="#{professoresMB.professor.nome}"/>
+                                    <p:outputLabel value="Sobrenome: "  />
+                                    <h:outputText  value="#{professoresMB.professor.sobrenome}"/>
+                                    <p:outputLabel value="Formação: " />
+                                    <h:outputText  value="#{professoresMB.professor.formacao}"/>
+                                    <p:outputLabel value="Rua: "/>
+                                    <h:outputText  value="#{professoresMB.profEndereco.rua}"/>
+                                    <p:outputLabel value="Bairro: "/>
+                                    <h:outputText  value="#{professoresMB.profEndereco.bairro}"/>
+                                    <p:outputLabel value="Numero: "/>
+                                    <h:outputText  value="#{professoresMB.profEndereco.numero}"/>
+                                    <p:outputLabel value="Cidade: " />
+                                    <h:outputText  value="#{professoresMB.profEndereco.cidade}"/>
+                                    <p:outputLabel value="CEP: " />
+                                    <h:outputText  value="#{professoresMB.profEndereco.cep}"/>
+                                    <c:if test="#{ not empty professoresMB.professor.email}">
+                                        <p:outputLabel value="E-mail: " />
+                                        <h:outputText  value="#{professoresMB.professor.email}"/>
+                                    </c:if>
+                                </h:panelGrid>
+                                <p:commandButton value="Salvar Professor" action="#{professoresMB.salvar}" process="@form"
+                                        update=":table_form :dialog_form" 
+                                        onsuccess="PF('wizard').loadStep('wiz_tab1', false); PF('dlg1').hide();"/>
+                                
+                            </p:panel>
+                        </p:tab>
+                    </p:wizard>
+                    
+                    <p:commandButton value="Cancelar" type="button" onclick="PF('dlg1').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+                </h:form>
+            </p:dialog>
+            
+            
+            
+            <p:dialog header="Professor #{professoresMB.professor.toString()}" id="dialog_detalhes" 
+                      widgetVar="dialog_detalhes" height="450px" width="50%" modal="true">
+                <p:tabView>
+                    <p:tab title="Dados Básicos">
+                        <h:panelGrid columns="2" class="fullwidth">
+                            <p:outputLabel value="Nome: " />
+                            <h:outputText  value="#{professoresMB.professor.nome}"/>
+                            <p:outputLabel value="Sobrenome: "  />
+                            <h:outputText  value="#{professoresMB.professor.sobrenome}"/>
+                            <p:outputLabel value="Formação: " />
+                            <h:outputText  value="#{professoresMB.professor.formacao}"/>
+                        </h:panelGrid> 
+                    </p:tab>
+                    <p:tab title="Endereço">
+                        <h:panelGrid columns="2" class="fullwidth">
+                            <p:outputLabel value="Rua: "/>
+                            <h:outputText  value="#{professoresMB.profEndereco.rua}"/>
+                            <p:outputLabel value="Bairro: "/>
+                            <h:outputText  value="#{professoresMB.profEndereco.bairro}"/>
+                            <p:outputLabel value="Numero: "/>
+                            <h:outputText  value="#{professoresMB.profEndereco.numero}"/>
+                            <p:outputLabel value="Cidade: " />
+                            <h:outputText  value="#{professoresMB.profEndereco.cidade}"/>
+                            <p:outputLabel value="CEP: " />
+                            <h:outputText  value="#{professoresMB.profEndereco.cep}"/>
+                        </h:panelGrid>
+                    </p:tab>
+                    <p:tab title="Contato">
+                        <h:panelGrid  columns="2" class="fullwidth">
+                            <c:if test="#{ not empty professoresMB.professor.email}">
+                                <p:outputLabel value="E-mail: " />
+                                <h:outputText  value="#{professoresMB.professor.email}"/>
+                            </c:if>
+                            <p:outputLabel rendered="#{empty professoresMB.professor.email}" 
+                                       value="Esse professor não possui E-mail!"/>
+                        </h:panelGrid>
+                        
+
+                    </p:tab>
+                    <p:tab title="Matérias">
+                        <p:dataGrid value="#{professoresMB.professor.materias}" var="mat" columns="2" paginatorPosition="bottom"
+                                    paginator="true" emptyMessage="Esse professor não possui matérias!" layout="grid">
+                            <h:panelGrid columns="2" class="fullwidth">
+                                <p:outputLabel value="Matéria: "/>
+                                <h:outputText  value="#{mat.nome}"/>
+                                <p:outputLabel value="Matéria - Série: "/>
+                                <h:outputText  value="#{mat.serie.nome}"/>
+                            </h:panelGrid>
+                        </p:dataGrid>
+                    </p:tab>
+                </p:tabView>
+                
+                <p:commandButton value="Fechar" type="button" onclick="PF('dialog_detalhes').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+            </p:dialog>
+
+        </ui:define>
+        
+        <ui:define name="scripts">
+            
+        </ui:define>
+    </ui:composition> 
+    
+</html>

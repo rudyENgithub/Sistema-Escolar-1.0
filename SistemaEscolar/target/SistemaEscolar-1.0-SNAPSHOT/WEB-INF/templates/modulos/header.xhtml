@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+        
+    
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h:form>
+                        <p:menubar>
+                            <p:menuitem value="Início" action="index.xhtml?faces-redirect=true"  />
+                            <p:menuitem value="Professores" action="professores.xhtml"/>
+                            <p:menuitem value="Alunos" action="alunos.xhtml"/>
+                            <p:menuitem value="Turmas" action="turmas.xhtml"/>
+                            <p:menuitem value="Matérias" action="materias.xhtml"/>
+                            <p:menuitem value="Séries" action="series.xhtml"/>
+                            <p:menuitem value="Turmas e Alunos" action="gerenciarTurmasAlunos.xhtml"/>
+                        </p:menubar>
+
+                    </h:form>
+                </div>
+            </div>
+        </div> 
+    </ui:composition>
+</html>

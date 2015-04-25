@@ -1,0 +1,64 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Mar 27, 2015, 2:03:12 AM
+    Author     : Vitor Freitas
+*/
+
+#page
+{
+    box-shadow: 2px 2px 5px black;
+}
+
+#top-bar
+{
+
+}
+
+#header
+{
+    margin-bottom: 0.5%;
+}
+
+
+#content
+{
+    margin-bottom: 2%;
+}
+
+#footer
+{
+
+}
+
+
+.ui-icon.fa 
+{
+    text-indent:0px
+}
+
+input[type*='text']
+{
+    margin-bottom: 2%;
+}
+
+.fullwidth
+{
+    width: 100%;
+}
+
+.putmiddle
+{
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    
+}
+
+
+

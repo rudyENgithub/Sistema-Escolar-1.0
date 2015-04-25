@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+          
+    
+    
+    <ui:composition template="WEB-INF/templates/template.xhtml">
+        
+        <ui:define name="metadata">
+            
+        </ui:define>
+        
+        <ui:define name="styles">
+            
+        </ui:define>
+        <ui:define name="title">
+            Alunos - Sistema Escolar
+        </ui:define>
+        
+        
+        <ui:define name="content">
+            
+            
+            <div class="container">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <p:outputLabel value="Alunos" style="font-size: 2em;"/>
+                        <p:commandButton value="Adicionar Novo" style="margin-left: 5px;" 
+                                        oncomplete="PF('dlg1').show();" update=":dialog_form dlg1" 
+                                        actionListener="#{alunosMB.newAluno()}" icon="ui-icon-plusthick" process="@this" resetValues="true"/>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!--<p:inputText placeholder="Buscar...." style="width: 100%;"/>-->
+                    </div>
+                </div>
+                
+                <div class="row" style="margin-top: 1%;">
+                    <div class="col-md-12">
+                        <h:form id="table_form">
+                            <p:messages />
+                            <p:dataTable id="lazyTable" var="aluno" value="#{alunosMB.lazyAlunos}" paginator="true" 
+                                         rows="10" paginatorPosition="bottom" emptyMessage="Não foram encontrados resultados" 
+                                         lazy="true" rowsPerPageTemplate="5,10,15"
+                                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} 
+                                         {NextPageLink} {LastPageLink}     {RowsPerPageDropdown}"
+                                         currentPageReportTemplate="Registros: {startRecord} - {endRecord} de {totalRecords}, 
+                                         Página: {currentPage} de {totalPages}"
+                                         rowsPerPageLabel="Registros por página: "
+                                         sortBy="#{aluno.id}" sortOrder="ascending">
+                                
+                                <f:facet name="header">
+                                    Alunos
+                                    <p:commandButton id="toggler" type="button" value="Colunas" style="float:right" icon="ui-icon-calculator" />
+                                    <p:columnToggler datasource="lazyTable" trigger="toggler" />
+                                </f:facet>
+                                
+                                <p:column headerText="ID" sortBy="#{aluno.id}">
+                                    <h:outputText value="#{aluno.id}"/>
+                                </p:column>
+                                
+                                <p:column headerText="NOME COMPLETO" sortBy="#{aluno.nome}" 
+                                          filterBy="#{aluno.sobrenome}">
+                                    <h:outputText 
+                                        value="#{aluno.toString()}"/>
+                                </p:column> 
+                                
+                                <p:column headerText="TURMA" sortBy="#{aluno.turma.nome}" 
+                                          filterBy="#{aluno.turma.nome}">
+                                    <h:outputText 
+                                        value="#{empty aluno.turma.nome ? 'Não Possui Turma' : aluno.turma.nome}"/>
+                                </p:column>
+                                
+                                <p:column headerText="SÉRIE" sortBy="#{aluno.serie.nome}" 
+                                          filterBy="#{aluno.serie.nome}">
+                                    <h:outputText 
+                                    value="#{aluno.serie.nome}"/>
+                                </p:column>
+                                
+                                <p:column headerText="AÇÔES">
+                                    
+                                    <p:commandButton value="Detalhes" actionListener="#{alunosMB.selectAluno(aluno)}"
+                                        oncomplete="PF('dialog_detalhes').show();" update=":dialog_detalhes" process="@this"/>
+                                    
+                                    <p:commandButton value="Editar" actionListener="#{alunosMB.selectAluno(aluno)}" 
+                                        oncomplete="PF('dlg1').show(); PF('wizard').loadStep('wiz_tab1', false);" 
+                                                     update=":dialog_form" resetValues="true" process="@this"/>
+                                    
+                                    <p:commandButton value="Excluir" process="@this" update=":table_form" 
+                                                     actionListener="#{alunosMB.deleteAluno(aluno)}">
+                                        <p:confirm header="Confirmação" message="Tem certeza que deseja excluir o aluno #{aluno.toString()}?" 
+                                                   icon="ui-icon-alert" />
+                                    </p:commandButton>
+                                    
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+                    
+                    </div>
+                </div>
+            </div>
+            
+            <p:dialog header="Alunos" widgetVar="dlg1" height="450px" width="50%" modal="true" id="dlg1" >
+                <p:ajax event="close" update=":dialog_form" listener="#{alunosMB.newAluno()}"/>
+                <h:form id="dialog_form">
+                    <p:wizard backLabel="Voltar" nextLabel="Próximo" widgetVar="wizard">
+                        <p:tab title="Dados Básicos" id="wiz_tab1">
+                            <p:panel header="Dados Pessoais">
+                                <p:messages/>
+                                <h:panelGrid columns="2" class="fullwidth">
+                                    <p:outputLabel value="Nome: *  " for="aluno_nome"/>
+                                    <p:inputText id="aluno_nome" value="#{alunosMB.aluno.nome}"/>
+                                    <p:outputLabel value="Sobrenome: *  " for="aluno_sobrenome" />
+                                    <p:inputText id="aluno_sobrenome" value="#{alunosMB.aluno.sobrenome}"/>
+                                    <p:outputLabel value="RG: *  " for="aluno_rg" />
+                                    <p:inputText id="aluno_rg" value="#{alunosMB.aluno.rg}"/>
+                                    <p:outputLabel value="Data de Nascimento: *  " for="aluno_data" />
+                                    <p:calendar id="aluno_data" value="#{alunosMB.aluno.dataNascimento}" 
+                                                pattern="dd/MM/yyyy" mask="true" pagedate="1/1/2000" 
+                                                mindate="1/1/1995" maxdate="1/1/2008" locale="pt">
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                    </p:calendar>
+                                    <p:outputLabel value="Série: " for="selectSerie"/>
+                                    <p:selectOneMenu id="selectSerie" value="#{alunosMB.selectedSerieId}" filter="true" filterMatchMode="startsWith"
+                                                     style="width: 200px;" required="true" requiredMessage="Preencha a série!">
+                                        <p:ajax event="change" listener="#{alunosMB.onSerieSelect}" process="@this"/>
+                                        <f:selectItem itemLabel="-- Escolha uma Série --" noSelectionOption="true"/>
+                                        <f:selectItems value="#{alunosMB.series}" var="serie" itemLabel="#{serie.nome}"
+                                                       itemValue="#{serie.id}"/>
+                                    </p:selectOneMenu>
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Endereço">
+                            <p:panel header="Informações de Encereço">
+                                <p:messages/>
+                                <h:panelGrid columns="2" class="fullwidth">
+                                    <p:outputLabel value="Rua: *  " for="rua"/>
+                                    <p:inputText id="rua" value="#{alunosMB.endereco.rua}"/>
+                                    <p:outputLabel value="Bairro: *  " for="bairro"/>
+                                    <p:inputText id="bairro" value="#{alunosMB.endereco.bairro}"/>
+                                    <p:outputLabel value="Numero: *  " for="numero"/>
+                                    <p:inputText id="numero" value="#{alunosMB.endereco.numero}"/>
+                                    <p:outputLabel value="Cidade: *  " for="cidade"/>
+                                    <p:inputText id="cidade" value="#{alunosMB.endereco.cidade}"/>
+                                    <p:outputLabel value="CEP: *  " for="cep"/>
+                                    <p:inputMask id="cep" value="#{alunosMB.endereco.cep}" mask="99999-999"/>
+                                    
+                                    
+                                    <p:commandButton id="gmapBtn" value="Var Mapa!" type="button" />
+                                    <p:overlayPanel id="imagePanel" for="gmapBtn" hideEffect="fade" my="right"
+                                                    at="right">
+                                        <div id="gmap" style="width: 100%; height: 300px;">
+                                                
+                                        </div>
+                                    </p:overlayPanel>
+                                    
+                                   
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Contato">
+                            <p:panel header="Dados Pessoais">
+                                <p:messages/>
+                                <h:panelGrid columns="2" class="fullwidth">
+
+                                    
+                                    
+                                </h:panelGrid>
+                                
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Confirmar">
+                            <p:panel header="Confirmar Dados e Salvar">
+                                <p:messages/>
+                                <h:panelGrid columns="4" class="fullwidth">
+                                      
+                                    <p:outputLabel value="Nome: " />
+                                    <h:outputText  value="#{alunosMB.aluno.nome}"/>
+                                    <p:outputLabel value="Sobrenome: "  />
+                                    <h:outputText  value="#{alunosMB.aluno.sobrenome}"/>
+                                    <p:outputLabel value="RG: " />
+                                    <h:outputText  value="#{alunosMB.aluno.rg}"/>
+                                    <p:outputLabel value="Data Nascimento: " />
+                                    <h:outputText  value="#{alunosMB.aluno.dataNascimento}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy"/>
+                                    </h:outputText>
+                                    <p:outputLabel value="Rua: "/>
+                                    <h:outputText  value="#{alunosMB.endereco.rua}"/>
+                                    <p:outputLabel value="Bairro: "/>
+                                    <h:outputText  value="#{alunosMB.endereco.bairro}"/>
+                                    <p:outputLabel value="Numero: "/>
+                                    <h:outputText  value="#{alunosMB.endereco.numero}"/>
+                                    <p:outputLabel value="Cidade: " />
+                                    <h:outputText  value="#{alunosMB.endereco.cidade}"/>
+                                    <p:outputLabel value="CEP: " />
+                                    <h:outputText  value="#{alunosMB.endereco.cep}"/>
+                                    
+                                    <p:outputLabel value="Série: "/>
+                                    <h:outputText value="#{alunosMB.aluno.serie.nome}"/> 
+                                </h:panelGrid>
+                                <p:commandButton value="Salvar Aluno" action="#{alunosMB.saveAluno()}" process="@form"
+                                        update=":table_form :dialog_form" onsuccess="PF('wizard').loadStep('wiz_tab1', false); PF('dlg1').hide();"/>
+
+                            </p:panel>
+                        </p:tab>
+                    </p:wizard>
+                    
+                    <p:commandButton value="Cancelar" type="button" onclick="PF('dlg1').hide();"
+                                     style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+                    
+                </h:form>
+            </p:dialog>
+            
+            
+            <p:dialog header="Alunos #{alunosMB.aluno.toString()}" id="dialog_detalhes" widgetVar="dialog_detalhes" height="450px" width="50%"
+                      modal="true">
+                <p:tabView>
+                    <p:tab title="Dados Básicos">
+                        <h:panelGrid columns="2" class="fullwidth">
+                            <p:outputLabel value="Nome: " />
+                            <h:outputText  value="#{alunosMB.aluno.nome}"/>
+                            <p:outputLabel value="Sobrenome: "  />
+                            <h:outputText  value="#{alunosMB.aluno.sobrenome}"/>
+                            <p:outputLabel value="RG: " />
+                            <h:outputText  value="#{alunosMB.aluno.rg}"/>
+                            <p:outputLabel value="Data Nascimento: " />
+                            <h:outputText  value="#{alunosMB.aluno.dataNascimento}">
+                                <f:convertDateTime pattern="MM/dd/yyyy"/>
+                            </h:outputText>
+                        </h:panelGrid> 
+                    </p:tab>
+                    <p:tab title="Endereço">
+                        <h:panelGrid columns="2" class="fullwidth">
+                            <p:outputLabel value="Rua: "/>
+                            <h:outputText  value="#{alunosMB.endereco.rua}"/>
+                            <p:outputLabel value="Bairro: "/>
+                            <h:outputText  value="#{alunosMB.endereco.bairro}"/>
+                            <p:outputLabel value="Numero: "/>
+                            <h:outputText  value="#{alunosMB.endereco.numero}"/>
+                            <p:outputLabel value="Cidade: " />
+                            <h:outputText  value="#{alunosMB.endereco.cidade}"/>
+                            <p:outputLabel value="CEP: " />
+                            <h:outputText  value="#{alunosMB.endereco.cep}"/>
+                        </h:panelGrid>
+                    </p:tab>
+                    <p:tab title="Contato">
+                        
+
+                    </p:tab>
+                    <p:tab title="Dados Escolares">
+                        <h:panelGrid columns="4" class="fullwidth"> 
+                            <p:outputLabel value="Turma do Aluno: "/>
+                            <h:outputText value="#{empty alunosMB.aluno.turma ? 
+                                                   'Não possui uma Turma!' :
+                                                   alunosMB.aluno.turma.nome}"/>
+                            
+                            <p:outputLabel value="Série do Aluno: "/>
+                            <h:outputText value="#{alunosMB.aluno.serie.nome}" />
+                        </h:panelGrid>
+                        
+                    </p:tab>    
+                </p:tabView>      
+                
+                <p:commandButton value="Fechar" type="button" onclick="PF('dialog_detalhes').hide();"
+                                    style="margin-top: 15px;" styleClass="putmiddle" icon="ui-icon-cancel"/>
+            </p:dialog>
+            
+        </ui:define> 
+        
+        
+        <ui:define name="scripts">
+            <h:outputScript name="locales.js"/>
+        </ui:define>
+    </ui:composition> 
+    
+</html>
